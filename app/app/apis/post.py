@@ -3,7 +3,7 @@
 # can only read posts
 from flask import Blueprint
 
-from app.models.schemas.post import Post
+from app.app.models.schemas.word import Post
 from app.utils.openapi import openapi
 
 bp = Blueprint("post", __name__, url_prefix="/api/post-service/v1/posts")

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from pydantic import BaseModel, PlainSerializer
@@ -6,7 +6,7 @@ from typing_extensions import Annotated
 
 
 def datetime_serializer(dt: datetime):
-    return dt.isoformat()
+    return dt.astimezone(timezone.utc).isoformat()
 
 
 CustomDateTime = Annotated[
