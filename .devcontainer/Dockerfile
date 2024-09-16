@@ -1,16 +1,12 @@
 FROM python:3.12
-# here i pick python:3.xx instead of our base on ACR
-# becuase the base on ACR is amd64
-# then arm machines will have issues
-ENV PYTHONUNBUFFERED 1
-# to prevent run as root
-ARG DOCKER_HOME="/opt/meesa"
-ARG DOCKER_CODE="/opt/meesa/code"
-ARG DOCKER_GROUP="meesa"
-ARG DOCKER_USER="meesa"
-ARG DOCKER_UID=5000
 
-ENV ZSH="/opt/meesa/.oh-my-zsh"
+ENV PYTHONUNBUFFERED 1
+
+ARG DOCKER_HOME="/opt/yijun"
+ARG DOCKER_CODE="/opt/yijun/code"
+ARG DOCKER_GROUP="yijun"
+ARG DOCKER_USER="yijun"
+ARG DOCKER_UID=5000
 
 WORKDIR ${DOCKER_CODE}
 
@@ -20,26 +16,26 @@ RUN groupadd -g ${DOCKER_UID} ${DOCKER_GROUP} \
 
 RUN apt-get update && \
     apt-get install -y curl && \
+    apt-get install -y sudo && \
+    apt-get install -y cargo && \
     apt-get install -y git && \
     apt-get install -y openssh-client && \
     apt-get install -y postgresql-client && \
     pip install --upgrade pip && \
-    pip install poetry==1.8.3 && \
+    pip install --upgrade poetry && \
+    echo ${DOCKER_USER} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${DOCKER_USER} && \
+    chmod 0440 /etc/sudoers.d/${DOCKER_USER} && \
     poetry config virtualenvs.create false
 
-# Install zsh, omz, plugins
-RUN apt-get install -y zsh
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-
-# will add examples to install our own python modules
-# maybe not via git+ssh, well we will decide later if we have any
+# Setup env
 RUN mkdir ${DOCKER_HOME}/.ssh && \
     chown -R ${DOCKER_USER} ${DOCKER_HOME}/.ssh && \
-    ssh-keyscan github.com >> ${DOCKER_HOME}/.ssh/known_hosts
+    ssh-keyscan bitbucket.org >> ${DOCKER_HOME}/.ssh/known_hosts && \
+    echo "alias docker='sudo docker'" > ${DOCKER_HOME}/.bashrc
 
-ENV PATH "$PATH:/opt/meesa/.local/bin"
+ENV PATH "$PATH:/opt/yijun/.local/bin"
 ENV PYTHONPATH=.
 
 USER ${DOCKER_USER}
-ENTRYPOINT [ "/bin/sh", "-c" ]
 
+ENTRYPOINT [ "/bin/sh", "-c" ]
