@@ -33,29 +33,92 @@ this is the backend!!
 
 ### database design
 
-* 标准字表 (standard_characters)
+* 标准字表 (standard_forms)
 
     * 意思和发音会被存入另外的表
     * 表大概的样子
 
-        | id | form | common_character_id | description  |
-        |----|------|------|------|
-        | 0  | 济   | 13  |  一些描述   |
+        | id | form |
+        |----|------|
+        | 0  | 济   |
+        | 1  | 借   | 
+        | 2 | 手   |  
 
 
-* 常用字表
+* 常用字表 (common_forms)
 
-    * 比如用户输入一个常用字，后端先从此表获得id，在用这个id去标准字表找标准字
     * 表大概的样子
 
-        | id | form | description  |
-        |----|------|------|
-        | 13  | 借   | 因为xx原因，  |
+        | id | form |
+        |----|------|
+        | 13  | 借   |
 
-* 标准词表
-* 常用词表
-* 字发音表
+* 常用字正体字关联表 (std_common_associations)
+
+    * 比如用户搜借，根据不用场景，我们先搜一遍常用字表，得到了常用字的id，拿着这个id，来这个关联表，可以找到它所对应的所有正字，以及为什么
+    * 表大概的样子
+
+        | standard_form_id | common_form_id | explanation  | 
+        |------|---|----|
+        |  0   | 13 |  因为上山下乡，济不小心就变成了借 |
+
+
+* 词表 (words)
+
+    * 表大概的样子
+
+        | id | standard_form | common_form |
+        |----|------|-----|
+        | 56  | 濟手   | 借手 |
+
+
+
+* 字发音表 (form_pronounciations)
+
+    * 不是每个列都必须有数据的，前端有啥显示啥
+    * 一个正字可以有多个发音
+    * 表大概的样子
+
+        |  standard_form_id | pinyin | wu  | canton | phonetics
+        |----|---|---|-----|-----|
+        | 0 |  ji | tci,213  | null |  null  |
+
+* 词发音表 (word_pronounciations)
+
+    * 不是每个列都必须有数据的，前端有啥显示啥
+    * 一个词可以有多个发音
+    * 表大概的样子
+
+        |  word_id | pinyin | wu  | canton | phonetics
+        |----|---|---|-----|-----|
+        | 56 |  jiasei | ((tcia, 213),(sei, 52)) | null |  null  |
+        | 56 |  jisei | ((tci, 213),(sei, 52))  | null |  null  |
+
 * 意思表
+
+    * 表大概的样子
+
+        | category | mapping_id | word_or_form | meaning |
+        |--------|-----|----|----|
+        | verb | 1 | 字 | 用别人的，但是要还，有～有还，再借不难
+        | verb | 0 | 字 | 帮助，～世救人
+        | noun | 56 | 词 | 左手
+
+
 * 文献表
-* 文献与词关联表
-* 文献与字关联表
+
+    * 表大概的样子
+
+        |  id | display_name | category | author  | published_at
+        |----|---|---|----|----|
+        | 0 |  杭州方言词典 |  词典 |  鲍士杰 | null
+
+* 文献与词字词关联表
+
+    * 表大概的样子
+
+        | source_id | mapping_id | word_or_form | data |
+        |--------|-----|----|----|
+        | 0 | 3 | 字 | {key: value, key: value, key: value}
+        | 0 | 56 | 词 | {key: value, key: value, key: value}
+
