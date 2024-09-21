@@ -33,7 +33,7 @@ this is the backend!!
 
 ### database design
 
-* 标准字表 (standard_forms)
+* 标准字表 (standard_chars)
 
     * 意思和发音会被存入另外的表
     * 表大概的样子
@@ -45,7 +45,7 @@ this is the backend!!
         | 2 | 手   |  
 
 
-* 常用字表 (common_forms)
+* 常用字表 (common_chars)
 
     * 表大概的样子
 
@@ -53,25 +53,40 @@ this is the backend!!
         |----|------|
         | 13  | 借   |
 
-* 常用字正体字关联表 (std_common_associations)
+* 常用字正体字关联表 (std_common_char_associations)
 
     * 比如用户搜借，根据不用场景，我们先搜一遍常用字表，得到了常用字的id，拿着这个id，来这个关联表，可以找到它所对应的所有正字，以及为什么
     * 表大概的样子
 
-        | standard_form_id | common_form_id | explanation  | 
+        | standard_id | common_id | explanation  | 
         |------|---|----|
         |  0   | 13 |  因为上山下乡，济不小心就变成了借 |
 
 
-* 词表 (words)
+* 标准词表 (standard_words)
 
     * 表大概的样子
 
-        | id | standard_form | common_form |
-        |----|------|-----|
-        | 56  | 濟手   | 借手 |
+        | id | form | 
+        |----|------|
+        | 56  | 濟手 
 
+* 常用词表 (common_words)
 
+    * 表大概的样子
+
+        | id | form |
+        |----|------|
+        | 23  | 借手 |
+
+* 常用词正体词关联表 (std_common_word_associations)
+
+    * 比如用户搜借，根据不用场景，我们先搜一遍常用字表，得到了常用字的id，拿着这个id，来这个关联表，可以找到它所对应的所有正字，以及为什么
+    * 表大概的样子
+
+        | standard_id | common_id | explanation  | 
+        |------|---|----|
+        |  56   | 23 |  有些词的变迁可能和字无关，如果和字有关，可以通过代码找到理由 |
 
 * 字发音表 (form_pronounciations)
 
@@ -79,7 +94,7 @@ this is the backend!!
     * 一个正字可以有多个发音
     * 表大概的样子
 
-        |  standard_form_id | pinyin | wu  | canton | phonetics
+        |  standard_id | pinyin | wu  | canton | phonetics
         |----|---|---|-----|-----|
         | 0 |  ji | tci,213  | null |  null  |
 
@@ -89,7 +104,7 @@ this is the backend!!
     * 一个词可以有多个发音
     * 表大概的样子
 
-        |  word_id | pinyin | wu  | canton | phonetics
+        |  standard_id | pinyin | wu  | canton | phonetics
         |----|---|---|-----|-----|
         | 56 |  jiasei | ((tcia, 213),(sei, 52)) | null |  null  |
         | 56 |  jisei | ((tci, 213),(sei, 52))  | null |  null  |
@@ -98,11 +113,11 @@ this is the backend!!
 
     * 表大概的样子
 
-        | category | mapping_id | word_or_form | meaning |
+        | category | standard_id | word_or_char | meaning |
         |--------|-----|----|----|
-        | verb | 1 | 字 | 用别人的，但是要还，有～有还，再借不难
-        | verb | 0 | 字 | 帮助，～世救人
-        | noun | 56 | 词 | 左手
+        | verb | 1 | char | 用别人的，但是要还，有～有还，再借不难
+        | verb | 0 | char | 帮助，～世救人
+        | noun | 56 | word | 左手
 
 
 * 文献表
