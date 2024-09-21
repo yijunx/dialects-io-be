@@ -1,15 +1,14 @@
 version: '3'
 
 services:
-  user-backend:
+  app:
     build: 
       context: ..
       dockerfile: .devcontainer/Dockerfile
     volumes:
       - ~/.ssh:/opt/yijun/.ssh
+      - ../.devcontainer/zshrc:/opt/yijun/.zshrc
       - ..:/opt/yijun/code
-      - ~/etc/localtime:/opt/yijun/etc/localtime
-      - ~/etc/timezone:/opt/yijun/etc/timezone
     command: ["tail -f /dev/null"]
 
   db:

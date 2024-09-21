@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-
+from app.models.schemas.utils import CustomDateTime
 
 
 class Character(BaseModel):
@@ -11,12 +11,5 @@ class Word(BaseModel):
     """词"""
 
 
-    characters: list[Character]
-
-
-
 class Source(BaseModel):
     """出处"""
-
-
- 
