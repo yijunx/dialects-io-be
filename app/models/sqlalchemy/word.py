@@ -45,17 +45,23 @@ class CharSourceAssociationRecord(AdminRecord):
 
     page_number: Mapped[int] = mapped_column(Integer, nullable=True)
 
+    # 定
     consonant: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
+    # 東
     vowel: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
+    # 平
     tone: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
+    # 一
+    deng: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
 
     # 在学术文献中，通常直接采用音译 fanqie。这种翻译方式保留了反切的原有概念，特别是在音韵学研究中很常见。
+    # 徒紅
     fanqie: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
     # 广
     rhyme_category: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
     # 等是用来分类韵母的发音位置或口腔开合度的概念
     # 一等：舌位最靠后，发音时口腔最张开。
-    deng: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
+
 
     phonetic_vowel: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
     phonetic_consonant: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
