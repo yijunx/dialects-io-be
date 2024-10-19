@@ -1,117 +1,133 @@
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Index, BIGINT, String, VARCHAR
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, BIGINT, VARCHAR, Integer, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.sqlalchemy.base import Base
+from app.models.sqlalchemy.base import Base, AdminRecord
 
 
 
 
-class CommonCharacterORM(Base):
-    __tablename__ = "common_characters"
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+class StandardCharRecord(AdminRecord):
+    __tablename__ = "standard_char"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
 
-    # 常用字形
-    form: Mapped[str] = mapped_column(String, nullable=False, index=True)
-    # 描述, like why the common char is used
-    description: Mapped[str] = mapped_column(String, nullable=True)
+    # 标准字形
+    content: Mapped[str] = mapped_column(VARCHAR(1), nullable=False, index=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    description: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
 
-
-class StandardCharacterORM(Base):
-    __tablename__ = "standard_characters"
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-
-    # 標準字形
-    form: Mapped[str] = mapped_column(String, nullable=False, index=True)
-    common_character_id: Mapped[str] = mapped_column(String, nullable=True, index=True)
-
-    # 描述
-    description: Mapped[str] = mapped_column(String, nullable=True)
-
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+class StandardWordORM(AdminRecord):
+    __tablename__ = "standard_word"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
 
 
-class StandardWordORM(Base):
-    __tablename__ = "words"
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    # 標準字形
-    form: Mapped[str] = mapped_column(String, nullable=False, index=True)
-
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+class CharWordAssociationRecord(AdminRecord):
+    __tablename__ = "char_word_association"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    char_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
+    word_id: Mapped[str] = mapped_column(BIGINT, nullable=False, index=True)
+    char_position: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
-class CommonWordORM(Base):
-    __tablename__ = "common_words"
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    # 常用字形
-    form: Mapped[str] = mapped_column(String, nullable=False, index=True)
-
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+class CharRecord(AdminRecord):
+    __tablename__ = "daily_char"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    standard_char_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
+    content: Mapped[str] = mapped_column(VARCHAR(1), nullable=False, index=True)
 
 
-class PronounciationORM(Base):
-    __tablename__ = "pronounciations"
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    charactor_id: Mapped[str] = mapped_column(String, nullable=False)
+class CharSourceAssociationRecord(AdminRecord):
+    __tablename__ = "char_source_association"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    char_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
+    source_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
 
-    # 標準音，普通話拼音
-    pinyin: Mapped[str] = mapped_column(String, nullable=True, index=True)
-    # 標準音，吳語拼音
-    wu: Mapped[str] = mapped_column(String, nullable=True)
-    # 標準音，廣韻
-    canton: Mapped[str] = mapped_column(String, nullable=True)
-    # 標準音，國際音標
-    phonetic: Mapped[str] = mapped_column(String, nullable=True)
+    page_number: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    # 描述
-    description: Mapped[str] = mapped_column(String, nullable=True)
+    consonant: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
+    vowel: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
+    tone: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
 
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    # 在学术文献中，通常直接采用音译 fanqie。这种翻译方式保留了反切的原有概念，特别是在音韵学研究中很常见。
+    fanqie: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
+    # 广
+    rhyme_category: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
+    # 等是用来分类韵母的发音位置或口腔开合度的概念
+    # 一等：舌位最靠后，发音时口腔最张开。
+    deng: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
+
+    phonetic_vowel: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
+    phonetic_consonant: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
+    phonetic_tone: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
+
+    meaning: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
+    pronouciation_storage_uri: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
+
+class WordRecord(AdminRecord):
+    __tablename__ = "daily_word"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    standard_word_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
+    content: Mapped[str] = mapped_column(VARCHAR(10), nullable=False, index=True)
+
+    
+class WordSourceAssociationRecord(AdminRecord):
+    __tablename__ = "word_source_association"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    word_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
+    source_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
+
+    page_number: Mapped[int] = mapped_column(Integer, nullable=True)
+
+    
+    pronouciation_storage_uri: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
+    notes: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
+
+    tags: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
+    meaning: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
 
 
-class SourceORM(Base):
-    # 文獻索引
-    __tablename__ = "sources"
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    name: Mapped[str] = mapped_column(String, nullable=False)
-    description: Mapped[str] = mapped_column(String, nullable=True)
-    # generated by the system
-    # cover_image_key: Mapped[str] = mapped_column(String, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+class SentenceRecord(AdminRecord):
+    __tablename__ = "daily_sentence"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    content: Mapped[str] = mapped_column(VARCHAR(255), nullable=False, index=True)
+    meaning: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
 
 
-class SourceWordAssociationORM(Base):
-    __tablename__ = "source_word_associations"
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    source_id: Mapped[str] = mapped_column(
-        String, ForeignKey("sources.id"), nullable=False
-    )
-    word_id: Mapped[str] = mapped_column(String, ForeignKey("words.id"), nullable=False)
-    content: Mapped[dict] = mapped_column(JSON, nullable=False)
-
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+class SentenceCharAssociationRecord(AdminRecord):
+    __tablename__ = "sentence_char_association"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    sentence_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
+    char_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
+    char_position: Mapped[int] = mapped_column(Integer, nullable=False)
+  
 
 
-class SourceCharacterAssociationORM(Base):
-    __tablename__ = "source_character_associations"
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    source_id: Mapped[str] = mapped_column(
-        String, ForeignKey("sources.id"), nullable=False
-    )
-    character_id: Mapped[str] = mapped_column(
-        String, ForeignKey("characters.id"), nullable=False
-    )
-    content: Mapped[dict] = mapped_column(JSON, nullable=False)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+
+
+
+# class PronounciationORM(AdminRecord):
+#     __tablename__ = "pronounciations"
+#     id: Mapped[str] = mapped_column(String, primary_key=True)
+#     charactor_id: Mapped[str] = mapped_column(String, nullable=False)
+
+#     # 標準音，普通話拼音
+#     pinyin: Mapped[str] = mapped_column(String, nullable=True, index=True)
+#     # 標準音，吳語拼音
+#     wu: Mapped[str] = mapped_column(String, nullable=True)
+#     # 標準音，廣韻
+#     canton: Mapped[str] = mapped_column(String, nullable=True)
+#     # 標準音，國際音標
+#     phonetic: Mapped[str] = mapped_column(String, nullable=True)
+
+#     # 描述
+#     description: Mapped[str] = mapped_column(String, nullable=True)
+
+
+
+
+
+
+
+
