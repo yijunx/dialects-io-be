@@ -45,23 +45,29 @@ class CharSourceAssociationRecord(AdminRecord):
 
     page_number: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    # 定
+    # consonant for 同 is 定 in 广韵
     consonant: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
-    # 東
+
+    # vovel for 同 is 東 in 广韵
     vowel: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
-    # 平
+
+    # tone for 同 is 平 in 广韵
     tone: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
-    # 一
+
+    # 等是用来分类韵母的发音位置或口腔开合度的概念
+    # 一等：舌位最靠后，发音时口腔最张开。
+    # 二等：舌位略向前，发音时口腔张开度稍小。
+    # 三等：舌位向前，发音时口腔较为闭合。
+    # 四等：舌位最靠前，发音时口腔最闭合。
+    # in fact they describe i, u, v in pinyin
+    # deng for 同 is 一 in 广韵
     deng: Mapped[str] = mapped_column(VARCHAR(10), nullable=True)
 
     # 在学术文献中，通常直接采用音译 fanqie。这种翻译方式保留了反切的原有概念，特别是在音韵学研究中很常见。
-    # 徒紅
+    # 🍅 for 同 is 徒紅 in 广韵
     fanqie: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
-    # 广
+    # rhyme catefory for 同 is canton in 广韵 （废话）
     rhyme_category: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
-    # 等是用来分类韵母的发音位置或口腔开合度的概念
-    # 一等：舌位最靠后，发音时口腔最张开。
-
 
     phonetic_vowel: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
     phonetic_consonant: Mapped[str] = mapped_column(VARCHAR(20), nullable=True)
