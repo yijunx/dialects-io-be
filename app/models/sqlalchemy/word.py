@@ -1,26 +1,11 @@
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, BIGINT, String, VARCHAR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.sqlalchemy.base import Base
 
 
-class MeaningORM(Base):
-    __tablename__ = "word_or_char_meanings"
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-
-    # 词性
-    category: Mapped[str] = mapped_column(String, nullable=False, index=True)
-    # meanings
-    meaning_en: Mapped[str] = mapped_column(String, nullable=True)
-    meaning_cn: Mapped[str] = mapped_column(String, nullable=True)
-
-    word_id: Mapped[str] = mapped_column(String, nullable=True)
-    character_id: Mapped[str] = mapped_column(String, nullable=True)
-
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
 
 class CommonCharacterORM(Base):
