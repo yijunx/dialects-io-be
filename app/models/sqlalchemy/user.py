@@ -5,8 +5,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 import uuid
 from app.models.sqlalchemy.base import Base
 
-# these tables are inspired by prisma schema
-
 
 class UserRecord(Base):
     __tablename__ = "user"
