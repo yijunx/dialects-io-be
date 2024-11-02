@@ -13,14 +13,14 @@ class UserRoleEnum(int, Enum):
 
 
 class UserCreate(BaseModel):
-    name: str
+    display_name: str
     email: str
     role: UserRoleEnum
 
 
 class User(BaseModel):
     id: str
-    name: str
+    display_name: str
     email: str
     role: UserRoleEnum
     created_at: CustomDateTime

@@ -13,7 +13,7 @@ class UserRecord(Base):
     # cos keycloak uses uuid...
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
 
-    name: Mapped[str] = mapped_column(String, nullable=False)
+    display_name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
     nick_name: Mapped[str] = mapped_column(String, nullable=True)
 

@@ -1,5 +1,6 @@
 import re
 from typing import Optional
+from uuid import UUID
 
 import jwt
 from jwt import PyJWKClient
@@ -10,7 +11,7 @@ class Actor(BaseModel):
     """the one jwt is representing
     actor is the actor of the request"""
 
-    id: str
+    id: UUID
     email: Optional[str] = None
     name: str
     preferred_username: Optional[str] = None
@@ -52,7 +53,7 @@ def authenticate_token(
     else:
         decoded: dict = jwt.decode(token, options={"verify_signature": False})
     actor = Actor(
-        id=decoded["sub"],
+        id=UUID(decoded["sub"]),
         name=decoded["name"],
         email=decoded.get("email", None),
         preferred_username=decoded["preferred_username"],

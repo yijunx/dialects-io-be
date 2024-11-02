@@ -24,7 +24,7 @@ class MockUserService(UserServiceInterface):
         self.wink = wink
         self.user = User(
             id=user_id,
-            name="user_name",
+            display_name="user_name",
             email="user_email",
             role="reader",
             created_at=datetime.now(),

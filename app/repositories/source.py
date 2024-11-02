@@ -2,93 +2,104 @@ import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 
-from myauth import Actor
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.auth.core import Actor
 from app.models.exceptions.base import CustomError
-from app.models.schemas.user import User, UserGetParam, UserRoleEnum, Wink
-from app.models.schemas.util import PaginatedResponse
-from app.models.sqlalchemy import UserORM
+from app.models.schemas.source import (
+    Author,
+    AuthorCreate,
+    Source,
+    SourceAuthorAssociationCreate,
+    SourceCreate,
+)
+from app.models.schemas.utils import PaginatedResponse
+from app.models.sqlalchemy import (
+    AuthorRecord,
+    SourceAuthorAssociation,
+    SourceRecord,
+    UserRecord,
+)
 from app.repositories.util import translate_query_pagination
-from app.utils.config import configurations
+from app.models.schemas.utils import PaginatedResponse
 
 
-class UserRepoInterface(ABC):
-    @abstractmethod
-    def upsert_user(self, actor: Actor) -> User: ...
-    @abstractmethod
-    def get_user(self, user_id: str) -> User: ...
-    @abstractmethod
-    def list_users(self, param: UserGetParam) -> PaginatedResponse[User]: ...
-
-
-class SqlAlchemyUserRepo(UserRepoInterface):
+class SqlAlchemySourceRepo:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def upsert_user(self, actor: Actor) -> Wink:
-        """used by the login endpoint, login endpoint will get the
-        id token from the idp. the frontend nextjs app should already
-        verified the idtoken. thus the idtoken here must be legit.
-        """
-        db_user: UserORM = (
-            self.db.query(UserORM).filter(UserORM.email == actor.email).first()
+    def create_author(self, item_create: AuthorCreate, actor: Actor) -> Author:
+        db_item = AuthorRecord(
+            display_name=item_create.display_name,
+            creator_id=actor.id,
         )
+        self.db.add(db_item)
+        self.db.flush()
+        return Author.model_validate(db_item, from_attributes=True)
 
-        if db_user:
-            role = db_user.role
-            previous_login_at = db_user.last_login_at
-            # update stuff
-            db_user.last_login_at = datetime.now(timezone.utc)
-            db_user.realm = actor.iss.split("/")[-1]
-            print("db user exist!!")
-        else:
-            previous_login_at = None
-            role = UserRoleEnum.reader
-            db_user = UserORM(
-                id=actor.id,
-                name=actor.name,
-                email=actor.email,
-                role=role,
-                created_at=datetime.now(timezone.utc),
-                updated_at=datetime.now(timezone.utc),
-                last_login_at=datetime.now(timezone.utc),
-                realm=actor.iss.split("/")[-1],
-            )
-            self.db.add(db_user)
-            print("db user added!!")
+    def get_author(self, author_id: int) -> Author:
+        db_item = self.db.query(AuthorRecord).get(author_id)
+        if not db_item:
+            raise CustomError(f"author id {author_id} not found")
+        return Author.model_validate(db_item, from_attributes=True)
+    
 
-        if actor.email == configurations.MASTER_ACC_EMAIL:
-            role = UserRoleEnum.admin
-        return Wink(
-            last_login_at=previous_login_at, role=role, realm=actor.iss.split("/")[-1]
-        )
-
-    def get_user(self, user_id: str) -> User:
-        db_user: UserORM = self.db.query(UserORM).filter(UserORM.id == user_id).first()
-        if db_user:
-            return User.model_validate(db_user, from_attributes=True)
-        else:
-            raise CustomError(status_code=404, message="User does not exist")
-
-    def list_users(self, param: UserGetParam) -> PaginatedResponse[User]:
-        query = self.db.query(UserORM)
-
-        if param.email:
-            # email for exact match..
-            query = query.filter(UserORM.email == param.email)
-        else:
-            if param.name:
-                query = query.filter(UserORM.name.ilike(f"%{param.name}%"))
-
+    def list_authors(self) -> PaginatedResponse[Author]:
+        query = self.db.query(AuthorRecord)
         total = query.count()
-        limit, offset, paging = translate_query_pagination(
-            total=total, query_param=param
-        )
+        limit, offset, paging = translate_query_pagination(total=total)
         db_items = query.limit(limit).offset(offset)
-
-        return PaginatedResponse[User](
-            data=[User.model_validate(x, from_attributes=True) for x in db_items],
+        return PaginatedResponse[Author](
+            data=[Author.model_validate(x, from_attributes=True) for x in db_items],
             paging=paging,
         )
+
+
+
+    def create_source(self, item_create: SourceCreate, actor: Actor) -> Source:
+        db_item = SourceRecord(
+            display_name=item_create.display_name,
+            publish_date=item_create.publish_date,
+            pronounciation_category=item_create.pronounciation_category,
+            creator_id=actor.id,
+        )
+        self.db.add(db_item)
+        self.db.flush()
+        return Source.model_validate(db_item, from_attributes=True)
+    
+    def get_source(self, source_id: int) -> Source:
+        db_item = self.db.query(SourceRecord).get(source_id)
+        if not db_item:
+            raise CustomError(f"source id {source_id} not found")
+        return Source.model_validate(db_item, from_attributes=True)
+    
+    def list_sources(self) -> PaginatedResponse[Source]:
+        query = self.db.query(SourceRecord)
+        total = query.count()
+        limit, offset, paging = translate_query_pagination(total=total)
+        db_items = query.limit(limit).offset(offset)
+        return PaginatedResponse[Source](
+            data=[Source.model_validate(x, from_attributes=True) for x in db_items],
+            paging=paging,
+        )
+    
+    def create_source_author_association(
+        self, item_create: SourceAuthorAssociationCreate, actor: Actor
+    ) -> SourceAuthorAssociation:
+        db_item = SourceAuthorAssociation(
+            author_id=item_create.author_id,
+            source_id=item_create.source_id,
+            role=item_create.role,
+            age=item_create.age,
+            creator_id=actor.id,
+        )
+        self.db.add(db_item)
+        self.db.flush()
+        return SourceAuthorAssociation.model_validate(db_item, from_attributes=True)
+    
+    def delete_source_author_association(self, association_id: int) -> None:
+        db_item = self.db.query(SourceAuthorAssociation).get(association_id)
+        if not db_item:
+            raise CustomError(f"source author association id {association_id} not found")
+        self.db.delete(db_item)
+        self.db.flush()

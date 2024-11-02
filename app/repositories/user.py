@@ -10,12 +10,12 @@ from app.models.schemas.user import User, UserCreate, UserGetParam, UserRoleEnum
 from app.models.schemas.utils import PaginatedResponse
 from app.models.sqlalchemy import UserRecord
 from app.repositories.util import translate_query_pagination
-from app.utils.config import configurations
 
 
 class SqlAlchemyUserRepo:
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session, master_acc_email: str) -> None:
         self.db = db
+        self.master_acc_email = master_acc_email
 
     def upsert_user(self, actor: Actor) -> Wink:
         """used by the login endpoint, login endpoint will get the
@@ -36,8 +36,8 @@ class SqlAlchemyUserRepo:
             previous_login_at = None
             role = UserRoleEnum.reader
             db_user = UserRecord(
-                id=uuid.UUID(actor.id),
-                name=actor.name,
+                id=actor.id,
+                display_name=actor.name,
                 email=actor.email,
                 role=role,
                 # created_at=datetime.now(timezone.utc),
@@ -47,7 +47,7 @@ class SqlAlchemyUserRepo:
             )
             self.db.add(db_user)
             self.db.flush()
-        if actor.email == configurations.MASTER_ACC_EMAIL:
+        if actor.email == self.master_acc_email:
             role = UserRoleEnum.admin
         return Wink(
             last_login_at=previous_login_at, role=role, realm=actor.iss.split("/")[-1]
@@ -56,7 +56,7 @@ class SqlAlchemyUserRepo:
     def create_user(self, user_create: UserCreate) -> User:
         db_user = UserRecord(
             id=uuid.uuid4(),
-            name=user_create.name,
+            display_name=user_create.display_name,
             email=user_create.email,
             role=user_create.role,
         )
@@ -81,7 +81,7 @@ class SqlAlchemyUserRepo:
             query = query.filter(UserRecord.email == param.email)
         else:
             if param.name:
-                query = query.filter(UserRecord.name.ilike(f"%{param.name}%"))
+                query = query.filter(UserRecord.display_name.ilike(f"%{param.name}%"))
 
         total = query.count()
         limit, offset, paging = translate_query_pagination(
