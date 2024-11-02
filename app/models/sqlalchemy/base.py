@@ -1,8 +1,7 @@
-from sqlalchemy.orm import declarative_base
 from datetime import datetime
 
-from sqlalchemy import DateTime, BIGINT
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import BIGINT, DateTime
+from sqlalchemy.orm import Mapped, declarative_base, mapped_column
 
 Base = declarative_base()
 

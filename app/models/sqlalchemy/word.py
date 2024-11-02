@@ -1,11 +1,18 @@
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Index, BIGINT, VARCHAR, Integer, ARRAY
+from sqlalchemy import (
+    ARRAY,
+    BIGINT,
+    JSON,
+    VARCHAR,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.sqlalchemy.base import Base, AdminRecord
-
-
+from app.models.sqlalchemy.base import AdminRecord, Base
 
 
 class StandardCharRecord(AdminRecord):
@@ -16,6 +23,7 @@ class StandardCharRecord(AdminRecord):
     content: Mapped[str] = mapped_column(VARCHAR(1), nullable=False, index=True)
 
     description: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
+
 
 class StandardWordORM(AdminRecord):
     __tablename__ = "standard_word"
@@ -76,13 +84,14 @@ class CharSourceAssociationRecord(AdminRecord):
     meaning: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
     pronouciation_storage_uri: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
 
+
 class WordRecord(AdminRecord):
     __tablename__ = "daily_word"
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     standard_word_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
     content: Mapped[str] = mapped_column(VARCHAR(10), nullable=False, index=True)
 
-    
+
 class WordSourceAssociationRecord(AdminRecord):
     __tablename__ = "word_source_association"
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
@@ -91,7 +100,6 @@ class WordSourceAssociationRecord(AdminRecord):
 
     page_number: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    
     pronouciation_storage_uri: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
     notes: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
 
@@ -112,11 +120,6 @@ class SentenceCharAssociationRecord(AdminRecord):
     sentence_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
     char_id: Mapped[int] = mapped_column(BIGINT, nullable=False, index=True)
     char_position: Mapped[int] = mapped_column(Integer, nullable=False)
-  
-
-
-
-
 
 
 # class PronounciationORM(AdminRecord):
@@ -135,11 +138,3 @@ class SentenceCharAssociationRecord(AdminRecord):
 
 #     # 描述
 #     description: Mapped[str] = mapped_column(String, nullable=True)
-
-
-
-
-
-
-
-

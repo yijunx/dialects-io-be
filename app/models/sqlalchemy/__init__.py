@@ -1,4 +1,10 @@
 from .base import Base
+from .source import AuthorRecord, SourceAuthorAssociation, SourceRecord
 from .user import UserRecord
-from .source import AuthorRecord, SourceRecord, SourceAuthorAssociation
-from .word import StandardCharRecord, StandardWordORM, CharWordAssociationRecord, CharRecord, CharSourceAssociationRecord
+from .word import (
+    CharRecord,
+    CharSourceAssociationRecord,
+    CharWordAssociationRecord,
+    StandardCharRecord,
+    StandardWordORM,
+)

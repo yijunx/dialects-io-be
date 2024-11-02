@@ -6,7 +6,7 @@ from myauth import Actor
 from app.models.exceptions.base import CustomError
 from app.models.schemas.user import User, UserGetParam, UserRoleEnum, Wink
 from app.models.schemas.util import PageResponse, PaginatedResponse
-from app.repositories.user import UserRepoInterface
+from app.repositories.source import UserRepoInterface
 
 
 class UserServiceInterface(ABC):

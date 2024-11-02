@@ -2,7 +2,7 @@ from enum import Enum
 
 from flask import Flask
 
-from app.repositories.user import SqlAlchemyUserRepo
+from app.repositories.source import SqlAlchemyUserRepo
 from app.services.user import UserService, UserServiceInterface
 
 

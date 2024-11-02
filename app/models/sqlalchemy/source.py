@@ -1,9 +1,9 @@
-from datetime import datetime, date
+from datetime import date, datetime
 
-from sqlalchemy import DateTime, BIGINT, VARCHAR, DATE, Integer, ARRAY
+from sqlalchemy import ARRAY, BIGINT, DATE, VARCHAR, DateTime, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.sqlalchemy.base import Base, AdminRecord
+from app.models.sqlalchemy.base import AdminRecord, Base
 
 
 class AuthorRecord(AdminRecord):
@@ -19,7 +19,9 @@ class SourceRecord(AdminRecord):
     # 杭語詞典（我們自己的詞典）
     display_name: Mapped[str] = mapped_column(VARCHAR(50), nullable=False)
     publish_date: Mapped[date] = mapped_column(DATE, nullable=True)
-    pronounciation_category: Mapped[list] = mapped_column(ARRAY(VARCHAR(50)), nullable=True)
+    pronounciation_category: Mapped[list] = mapped_column(
+        ARRAY(VARCHAR(50)), nullable=True
+    )
 
 
 class SourceAuthorAssociation(AdminRecord):

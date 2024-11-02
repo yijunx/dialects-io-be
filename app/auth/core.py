@@ -1,13 +1,15 @@
+import re
+from typing import Optional
+
 import jwt
 from jwt import PyJWKClient
-import re
 from pydantic import BaseModel
-from typing import Optional
 
 
 class Actor(BaseModel):
     """the one jwt is representing
     actor is the actor of the request"""
+
     id: str
     email: Optional[str] = None
     name: str
@@ -24,7 +26,9 @@ class AuthSettings(BaseModel):
     JWT_AUDIENCE: str
 
 
-def authenticate_token(token: str, config: AuthSettings, verify_signature: bool = True) -> Actor:
+def authenticate_token(
+    token: str, config: AuthSettings, verify_signature: bool = True
+) -> Actor:
     decoded = None
     if verify_signature:
         try:
@@ -51,10 +55,10 @@ def authenticate_token(token: str, config: AuthSettings, verify_signature: bool 
         id=decoded["sub"],
         name=decoded["name"],
         email=decoded.get("email", None),
-        preferred_username=decoded["preferred_username"], 
+        preferred_username=decoded["preferred_username"],
         first_name=decoded.get("given_name", ""),
         last_name=decoded.get("family_name", ""),
-        iss=decoded["iss"]
+        iss=decoded["iss"],
     )
 
     return actor

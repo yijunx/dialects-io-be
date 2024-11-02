@@ -6,10 +6,16 @@ from pydantic import BaseModel
 from app.models.schemas.utils import CustomDateTime, PageParam
 
 
-class UserRoleEnum(str, Enum):
-    reader = "reader"
-    editor = "editor"
-    admin = "admin"
+class UserRoleEnum(int, Enum):
+    reader = 10
+    editor = 20
+    admin = 40
+
+
+class UserCreate(BaseModel):
+    name: str
+    email: str
+    role: UserRoleEnum
 
 
 class User(BaseModel):

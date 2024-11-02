@@ -1,19 +1,29 @@
 import uuid
+from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 
+from myauth import Actor
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.auth.core import Actor
 from app.models.exceptions.base import CustomError
-from app.models.schemas.user import User, UserCreate, UserGetParam, UserRoleEnum, Wink
-from app.models.schemas.utils import PaginatedResponse
-from app.models.sqlalchemy import UserRecord
+from app.models.schemas.user import User, UserGetParam, UserRoleEnum, Wink
+from app.models.schemas.util import PaginatedResponse
+from app.models.sqlalchemy import UserORM
 from app.repositories.util import translate_query_pagination
 from app.utils.config import configurations
 
 
-class SqlAlchemyUserRepo:
+class UserRepoInterface(ABC):
+    @abstractmethod
+    def upsert_user(self, actor: Actor) -> User: ...
+    @abstractmethod
+    def get_user(self, user_id: str) -> User: ...
+    @abstractmethod
+    def list_users(self, param: UserGetParam) -> PaginatedResponse[User]: ...
+
+
+class SqlAlchemyUserRepo(UserRepoInterface):
     def __init__(self, db: Session) -> None:
         self.db = db
 
@@ -22,66 +32,55 @@ class SqlAlchemyUserRepo:
         id token from the idp. the frontend nextjs app should already
         verified the idtoken. thus the idtoken here must be legit.
         """
-        db_user: UserRecord = (
-            self.db.query(UserRecord).filter(UserRecord.email == actor.email).first()
+        db_user: UserORM = (
+            self.db.query(UserORM).filter(UserORM.email == actor.email).first()
         )
 
         if db_user:
             role = db_user.role
-            previous_login_at = db_user.last_login_time
+            previous_login_at = db_user.last_login_at
             # update stuff
-            db_user.last_login_time = datetime.now(timezone.utc)
+            db_user.last_login_at = datetime.now(timezone.utc)
             db_user.realm = actor.iss.split("/")[-1]
+            print("db user exist!!")
         else:
             previous_login_at = None
             role = UserRoleEnum.reader
-            db_user = UserRecord(
-                id=uuid.UUID(actor.id),
+            db_user = UserORM(
+                id=actor.id,
                 name=actor.name,
                 email=actor.email,
                 role=role,
-                # created_at=datetime.now(timezone.utc),
-                # updated_at=datetime.now(timezone.utc),
-                # last_login_at=datetime.now(timezone.utc),
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
+                last_login_at=datetime.now(timezone.utc),
                 realm=actor.iss.split("/")[-1],
             )
             self.db.add(db_user)
-            self.db.flush()
+            print("db user added!!")
+
         if actor.email == configurations.MASTER_ACC_EMAIL:
             role = UserRoleEnum.admin
         return Wink(
             last_login_at=previous_login_at, role=role, realm=actor.iss.split("/")[-1]
         )
 
-    def create_user(self, user_create: UserCreate) -> User:
-        db_user = UserRecord(
-            id=uuid.uuid4(),
-            name=user_create.name,
-            email=user_create.email,
-            role=user_create.role,
-        )
-        self.db.add(db_user)
-        self.db.flush()
-        return User.model_validate(db_user, from_attributes=True)
-
     def get_user(self, user_id: str) -> User:
-        db_user: UserRecord = (
-            self.db.query(UserRecord).filter(UserRecord.id == user_id).first()
-        )
+        db_user: UserORM = self.db.query(UserORM).filter(UserORM.id == user_id).first()
         if db_user:
             return User.model_validate(db_user, from_attributes=True)
         else:
             raise CustomError(status_code=404, message="User does not exist")
 
     def list_users(self, param: UserGetParam) -> PaginatedResponse[User]:
-        query = self.db.query(UserRecord)
+        query = self.db.query(UserORM)
 
         if param.email:
             # email for exact match..
-            query = query.filter(UserRecord.email == param.email)
+            query = query.filter(UserORM.email == param.email)
         else:
             if param.name:
-                query = query.filter(UserRecord.name.ilike(f"%{param.name}%"))
+                query = query.filter(UserORM.name.ilike(f"%{param.name}%"))
 
         total = query.count()
         limit, offset, paging = translate_query_pagination(
